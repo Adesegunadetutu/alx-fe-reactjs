@@ -1,69 +1,60 @@
-// src/components/Search.jsx
 import { useState } from "react";
-import { searchGitHubUsers } from "../services/githubService";
+import { searchGitHubUsers, fetchUserData } from "../services/github";
 
 export default function Search() {
-  const [form, setForm] = useState({
-    username: "",
-    location: "",
-    minRepos: "",
-  });
+  const [username, setUsername] = useState("");
+  const [location, setLocation] = useState("");
+  const [minRepos, setMinRepos] = useState("");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
     try {
-      const results = await searchGitHubUsers(form);
-      setUsers(results);
-    } catch (err) {
-      setError("Failed to fetch users");
-    } finally {
-      setLoading(false);
+      const results = await searchGitHubUsers({ username, location, minRepos });
+
+      // Fetch additional details for each user
+      const detailedResults = await Promise.all(
+        results.map(async (user) => {
+          const details = await fetchUserData(user.login);
+          return { ...user, ...details };
+        })
+      );
+
+      setUsers(detailedResults);
+    } catch (error) {
+      console.error("Search failed:", error);
+      setUsers([]);
     }
+    setLoading(false);
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col gap-2">
-          <label htmlFor="username">Username</label>
-          <input
-            name="username"
-            value={form.username}
-            onChange={handleChange}
-            className="border border-gray-300 rounded p-2"
-            placeholder="Search by username"
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <label htmlFor="location">Location</label>
-          <input
-            name="location"
-            value={form.location}
-            onChange={handleChange}
-            className="border border-gray-300 rounded p-2"
-            placeholder="e.g. Lagos"
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <label htmlFor="minRepos">Minimum Repositories</label>
-          <input
-            name="minRepos"
-            value={form.minRepos}
-            onChange={handleChange}
-            className="border border-gray-300 rounded p-2"
-            placeholder="e.g. 10"
-            type="number"
-          />
-        </div>
+    <div className="max-w-3xl mx-auto p-4">
+      <form onSubmit={handleSearch} className="space-y-4 bg-white p-6 rounded shadow">
+        <h2 className="text-xl font-semibold">Advanced GitHub User Search</h2>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="w-full p-2 border rounded"
+        />
+        <input
+          type="text"
+          placeholder="Location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          className="w-full p-2 border rounded"
+        />
+        <input
+          type="number"
+          placeholder="Minimum Repositories"
+          value={minRepos}
+          onChange={(e) => setMinRepos(e.target.value)}
+          className="w-full p-2 border rounded"
+        />
         <button
           type="submit"
           className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"
@@ -72,41 +63,33 @@ export default function Search() {
         </button>
       </form>
 
-      {loading && <p className="mt-4 text-gray-600">Loading...</p>}
-      {error && <p className="mt-4 text-red-600">{error}</p>}
+      {loading && <p className="mt-4">Loading...</p>}
 
-      {users.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Results:</h2>
-          <ul className="space-y-4">
-            {users.map((user) => (
-              <li
-                key={user.id}
-                className="border p-4 rounded flex items-center justify-between"
-              >
-                <div className="flex items-center gap-4">
-                  <img
-                    src={user.avatar_url}
-                    alt={user.login}
-                    className="w-12 h-12 rounded-full"
-                  />
-                  <div>
-                    <p className="font-medium">{user.login}</p>
-                    <a
-                      href={user.html_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 text-sm"
-                    >
-                      View Profile
-                    </a>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <div className="mt-6 space-y-4">
+        {users.map((user) => (
+          <div key={user.id} className="border p-4 rounded shadow">
+            <div className="flex items-center space-x-4">
+              <img src={user.avatar_url} alt={user.login} className="w-12 h-12 rounded-full" />
+              <div>
+                <a
+                  href={user.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-lg font-semibold text-blue-600"
+                >
+                  {user.login}
+                </a>
+                <p className="text-sm text-gray-600">
+                  Location: {user.location || "Not specified"}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Public Repos: {user.public_repos ?? "N/A"}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
