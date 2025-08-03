@@ -2,41 +2,50 @@ import { useState } from 'react';
 import { useRecipeStore } from './recipeStore';
 
 export default function EditRecipeForm({ recipe, onClose }) {
+  const updateRecipe = useRecipeStore((state) => state.updateRecipe);
   const [title, setTitle] = useState(recipe.title);
   const [description, setDescription] = useState(recipe.description);
-  const updateRecipe = useRecipeStore((state) => state.updateRecipe);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault(); // ✅ This is the expected line
+
     updateRecipe(recipe.id, { title, description });
-    onClose();
+    onClose(); // Close the form after update
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Title"
-        className="w-full p-2 border rounded"
-      />
-      <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="Description"
-        className="w-full p-2 border rounded"
-      />
-      <div className="flex gap-4">
+    <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded shadow">
+      <div>
+        <label className="block font-semibold text-gray-700">Title</label>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full border rounded px-3 py-2 mt-1"
+          required
+        />
+      </div>
+      <div>
+        <label className="block font-semibold text-gray-700">Description</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full border rounded px-3 py-2 mt-1"
+          rows="4"
+          required
+        />
+      </div>
+      <div className="flex justify-between">
         <button
           type="submit"
-          className="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700"
+          className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"
         >
-          Save
+          Save Changes
         </button>
         <button
           type="button"
           onClick={onClose}
-          className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+          className="text-gray-600 hover:underline"
         >
           Cancel
         </button>
