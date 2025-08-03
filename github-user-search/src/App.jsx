@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { searchUsers } from "./services/github";
+import SearchBar from "./components/SearchBar";
+import UserCard from "./components/UserCard";
 
-function App() {
+export default function App() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
 
@@ -13,36 +15,27 @@ function App() {
       const data = await searchUsers(query);
       setResults(data.items || []);
     } catch (error) {
-      console.error("Search error:", error);
+      console.error("Search failed:", error);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <form onSubmit={handleSearch} className="mb-4">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search GitHub users"
-          className="p-2 border rounded w-full"
-        />
-      </form>
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold text-center text-teal-600 mb-8">
+          🔎 GitHub User Search
+        </h1>
 
-      <ul>
-        {results.map((user) => (
-          <li key={user.id} className="mb-2 p-2 bg-white shadow rounded">
-            <a href={user.html_url} target="_blank" rel="noreferrer">
-              <div className="flex items-center gap-4">
-                <img src={user.avatar_url} alt={user.login} className="w-12 h-12 rounded-full" />
-                <span>{user.login}</span>
-              </div>
-            </a>
-          </li>
-        ))}
-      </ul>
+        <SearchBar query={query} setQuery={setQuery} onSearch={handleSearch} />
+
+        <div>
+          {results.length === 0 && query ? (
+            <p className="text-center text-gray-500">No users found.</p>
+          ) : (
+            results.map((user) => <UserCard key={user.id} user={user} />)
+          )}
+        </div>
+      </div>
     </div>
   );
 }
-
-export default App;
