@@ -1,28 +1,33 @@
-import { useRecipeStore } from './recipeStore';
-import { Link } from 'react-router-dom';
+import { useRecipeStore } from '../components/recipeStore';
 
-export default function RecipeList() {
-  const recipes = useRecipeStore((state) => state.filteredRecipes);
+const RecipeList = () => {
+  const { recipes, favorites, addFavorite, removeFavorite } = useRecipeStore();
 
-  if (recipes.length === 0) {
-    return <p className="text-gray-500 text-center">No matching recipes found.</p>;
-  }
+  const toggleFavorite = (id) => {
+    if (favorites.includes(id)) {
+      removeFavorite(id);
+    } else {
+      addFavorite(id);
+    }
+  };
 
   return (
-    <div className="space-y-6">
+    <div>
+      <h2 className="text-xl font-semibold mb-4">All Recipes</h2>
       {recipes.map((recipe) => (
-        <div
-          key={recipe.id}
-          className="border border-gray-300 rounded-md p-4 bg-gray-50"
-        >
-          <h2 className="text-xl font-semibold text-teal-700">
-            <Link to={`/recipe/${recipe.id}`} className="hover:underline">
-              {recipe.title}
-            </Link>
-          </h2>
-          <p className="text-gray-600">{recipe.description}</p>
+        <div key={recipe.id} className="border p-4 rounded mb-4">
+          <h3 className="text-lg font-bold">{recipe.title}</h3>
+          <p>{recipe.description}</p>
+          <button
+            onClick={() => toggleFavorite(recipe.id)}
+            className="mt-2 text-sm text-teal-600 hover:underline"
+          >
+            {favorites.includes(recipe.id) ? '💔 Remove Favorite' : '❤️ Add to Favorites'}
+          </button>
         </div>
       ))}
     </div>
   );
-}
+};
+
+export default RecipeList;
