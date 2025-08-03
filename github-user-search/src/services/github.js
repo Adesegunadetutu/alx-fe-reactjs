@@ -1,13 +1,11 @@
-import axios from "axios";
+import axios from 'axios';
 
-const BASE_URL = "https://api.github.com";
+export const searchGitHubUsers = async ({ username, location, minRepos }) => {
+  let query = '';
+  if (username) query += `${username} in:login`;
+  if (location) query += ` location:${location}`;
+  if (minRepos) query += ` repos:>=${minRepos}`;
 
-export const searchUsers = async (query) => {
-  const response = await axios.get(`${BASE_URL}/search/users?q=${query}`);
-  return response.data;
-};
-
-export const getUserDetails = async (username) => {
-  const response = await axios.get(`${BASE_URL}/users/${username}`);
-  return response.data;
+  const response = await axios.get(`https://api.github.com/search/users?q=${encodeURIComponent(query)}`);
+  return response.data.items;
 };
