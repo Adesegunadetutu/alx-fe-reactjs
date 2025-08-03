@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { searchGitHubUsers } from './services/github';
+import { searchGitHubUsers } from './services/githubService';
 import './index.css';
 
 function App() {

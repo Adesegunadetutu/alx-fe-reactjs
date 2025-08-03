@@ -1,6 +1,6 @@
 // src/components/Search.jsx
 import { useState } from "react";
-import { searchGitHubUsers } from "../services/github";
+import { searchGitHubUsers } from "../services/githubService";
 
 export default function Search() {
   const [form, setForm] = useState({
