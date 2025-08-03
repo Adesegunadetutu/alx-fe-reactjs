@@ -1,47 +1,45 @@
 import { useState } from 'react';
-import { useRecipeStore } from './recipeStore';
+import { useRecipeStore } from '../components/recipeStore';
 
-const AddRecipeForm = () => {
-  const addRecipe = useRecipeStore((state) => state.addRecipe);
+export default function AddRecipeForm() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const addRecipe = useRecipeStore((state) => state.addRecipe);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (!title.trim() || !description.trim()) return;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!title || !description) return;
     addRecipe({
-      id: Date.now(),
-      title: title.trim(),
-      description: description.trim(),
+      id: Date.now().toString(), 
+      title,
+      description,
     });
     setTitle('');
     setDescription('');
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 max-w-lg mx-auto bg-white rounded shadow">
-      <h2 className="text-2xl font-semibold text-teal-700">Add a New Recipe</h2>
-
+    <form onSubmit={handleSubmit} className="space-y-4">
       <input
         type="text"
+        className="w-full p-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+        placeholder="Recipe title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="Recipe Title"
-        className="border border-gray-300 rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-teal-500"
       />
-
       <textarea
+        className="w-full p-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+        placeholder="Description"
+        rows="4"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        placeholder="Recipe Description"
-        className="border border-gray-300 rounded p-2 w-full h-28 resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"
       />
-
-      <button type="submit" className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700 transition">
+      <button
+        type="submit"
+        className="bg-teal-600 text-white px-5 py-2 rounded hover:bg-teal-700 transition"
+      >
         Add Recipe
       </button>
     </form>
   );
-};
-
-export default AddRecipeForm;
+}

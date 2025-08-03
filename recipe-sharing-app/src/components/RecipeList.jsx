@@ -1,23 +1,28 @@
-import { useRecipeStore } from './recipeStore';
+import { useRecipeStore } from '../components/recipeStore';
+import { Link } from 'react-router-dom';
 
-const RecipeList = () => {
+export default function RecipeList() {
   const recipes = useRecipeStore((state) => state.recipes);
 
+  if (recipes.length === 0) {
+    return <p className="text-gray-500 text-center">No recipes added yet.</p>;
+  }
+
   return (
-    <div className="space-y-4 mt-4">
-      <h2 className="text-xl font-semibold">Recipe List</h2>
-      {recipes.length === 0 ? (
-        <p>No recipes added yet.</p>
-      ) : (
-        recipes.map((recipe) => (
-          <div key={recipe.id} className="border p-4 rounded shadow-sm">
-            <h3 className="text-lg font-bold">{recipe.title}</h3>
-            <p>{recipe.description}</p>
-          </div>
-        ))
-      )}
+    <div className="space-y-6">
+      {recipes.map((recipe) => (
+        <div
+          key={recipe.id}
+          className="border border-gray-300 rounded-md p-4 bg-gray-50"
+        >
+          <h2 className="text-xl font-semibold text-teal-700">
+            <Link to={`/recipe/${recipe.id}`} className="hover:underline">
+              {recipe.title}
+            </Link>
+          </h2>
+          <p className="text-gray-600">{recipe.description}</p>
+        </div>
+      ))}
     </div>
   );
-};
-
-export default RecipeList;
+}
