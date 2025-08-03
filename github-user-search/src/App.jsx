@@ -1,41 +1,97 @@
-import { useState } from "react";
-import { searchUsers } from "./services/github";
-import SearchBar from "./components/SearchBar";
-import UserCard from "./components/UserCard";
+import { useState } from 'react';
+import { searchGitHubUsers } from './services/github';
+import './index.css';
 
-export default function App() {
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
+function App() {
+  const [username, setUsername] = useState('');
+  const [location, setLocation] = useState('');
+  const [minRepos, setMinRepos] = useState('');
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!query) return;
-
+    setLoading(true);
     try {
-      const data = await searchUsers(query);
-      setResults(data.items || []);
-    } catch (error) {
-      console.error("Search failed:", error);
+      const results = await searchGitHubUsers({ username, location, minRepos });
+      setUsers(results);
+    } catch (err) {
+      console.error('Search failed:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold text-center text-teal-600 mb-8">
-          🔎 GitHub User Search
-        </h1>
+    <div className="min-h-screen bg-gray-100 p-4">
+      <div className="max-w-xl mx-auto bg-white shadow rounded p-6">
+        <h1 className="text-2xl font-bold mb-4 text-center">GitHub User Search</h1>
 
-        <SearchBar query={query} setQuery={setQuery} onSearch={handleSearch} />
+        <form onSubmit={handleSearch} className="space-y-4">
+          <input
+            type="text"
+            placeholder="Username"
+            className="w-full px-4 py-2 border rounded"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Location"
+            className="w-full px-4 py-2 border rounded"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+          />
+          <input
+            type="number"
+            placeholder="Minimum Repositories"
+            className="w-full px-4 py-2 border rounded"
+            value={minRepos}
+            onChange={(e) => setMinRepos(e.target.value)}
+          />
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700"
+            disabled={loading}
+          >
+            {loading ? 'Searching...' : 'Search'}
+          </button>
+        </form>
 
-        <div>
-          {results.length === 0 && query ? (
-            <p className="text-center text-gray-500">No users found.</p>
+        <div className="mt-6">
+          {users.length > 0 ? (
+            <ul className="space-y-4">
+              {users.map((user) => (
+                <li
+                  key={user.id}
+                  className="flex items-center space-x-4 p-4 border rounded hover:shadow"
+                >
+                  <img
+                    src={user.avatar_url}
+                    alt={user.login}
+                    className="w-12 h-12 rounded-full"
+                  />
+                  <div>
+                    <p className="font-semibold">{user.login}</p>
+                    <a
+                      href={user.html_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 text-sm"
+                    >
+                      View Profile
+                    </a>
+                  </div>
+                </li>
+              ))}
+            </ul>
           ) : (
-            results.map((user) => <UserCard key={user.id} user={user} />)
+            <p className="text-center text-gray-500">No users found.</p>
           )}
         </div>
       </div>
     </div>
   );
 }
+
+export default App;
