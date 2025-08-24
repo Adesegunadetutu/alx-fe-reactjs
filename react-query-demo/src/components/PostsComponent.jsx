@@ -1,4 +1,3 @@
-// src/components/PostsComponent.jsx
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
@@ -20,6 +19,8 @@ export default function PostsComponent() {
     queryFn: fetchPosts,
     staleTime: 1000 * 60 * 5, // 5 minutes
     cacheTime: 1000 * 60 * 10, // 10 minutes
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    keepPreviousData: true,     // Keep old data while fetching new
   });
 
   if (isLoading) return <p>Loading posts...</p>;
