@@ -13,7 +13,10 @@ function App() {
 
         {/* Protected Route */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/profile/*" element={<Profile />} />
+          <Route element={<ProtectedRoute />}>
+  <Route path="/profile/*" element={<Profile />} />
+</Route>
+
         </Route>
 
         {/* ✅ Correct Dynamic Route */}
